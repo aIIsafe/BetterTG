@@ -29,6 +29,10 @@ final class TDLib: @unchecked Sendable {
         // Xcode 15+ is unable to handle so many logs
         try? td.setLogStream(logStream: .logStreamEmpty) { _ in }
 
+        Task.background {
+            await self.configureDefaultProxy()
+        }
+
         nc.publisher(&cancellables, for: .authorizationStateWaitTdlibParameters) { _ in
             Task.background {
                 let dir = try FileManager.default
@@ -107,4 +111,20 @@ final class TDLib: @unchecked Sendable {
 
     private var cancellables = Set<AnyCancellable>()
     private let manager = TDLibClientManager()
+
+    private func configureDefaultProxy() async {
+        do {
+            _ = try await td.addProxy(
+                server: TelegramProxy.server,
+                port: TelegramProxy.port,
+                enable: true,
+                type: .proxyTypeMtproto(
+                    ProxyTypeMtproto(secret: TelegramProxy.secret),
+                ),
+            )
+            log("MTProto proxy enabled: \(TelegramProxy.server):\(TelegramProxy.port)")
+        } catch {
+            log("Failed to enable MTProto proxy: \(error)")
+        }
+    }
 }

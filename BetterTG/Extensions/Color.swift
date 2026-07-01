@@ -10,10 +10,13 @@ extension Color {
     static let gray2 = Color(uiColor: .systemGray2)
 
     // AnyGram theme
-    static let chatBackground = Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 1)
-    static let bubbleIncoming = Color(red: 0.17, green: 0.17, blue: 0.20, opacity: 1)
-    static let bubbleOutgoing = Color(red: 0.15, green: 0.35, blue: 0.58, opacity: 1)
-    static let chatListBackground = Color(red: 0.07, green: 0.07, blue: 0.08, opacity: 1)
+    static let chatBackground = Color(red: 0.06, green: 0.12, blue: 0.22, opacity: 1)
+    // Incoming: slightly translucent dark, reads well on the blue gradient
+    static let bubbleIncoming = Color(red: 0.13, green: 0.17, blue: 0.27, opacity: 1)
+    // Outgoing: bright saturated blue, stands out from the background
+    static let bubbleOutgoing = Color(red: 0.17, green: 0.46, blue: 0.82, opacity: 1)
+    // Chat list row overlay: subtle dark tint for readability
+    static let chatListRowBackground = Color(red: 0.04, green: 0.09, blue: 0.18, opacity: 0.55)
 
     init(red: Int, green: Int, blue: Int, opacity: Double) {
         self.init(.sRGB, red: Double(red / 255), green: Double(green / 255), blue: Double(blue / 255), opacity: opacity)

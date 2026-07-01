@@ -46,8 +46,11 @@ private struct MainNavigationRootView: View {
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background { TelegramBackground() }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("AnyGram")
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .navigationBarHeight($navigationBarHeight.animation())
         .searchable(
             text: $rootVM.query,

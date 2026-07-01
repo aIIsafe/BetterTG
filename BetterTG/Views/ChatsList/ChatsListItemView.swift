@@ -65,6 +65,7 @@ struct ChatsListItemView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+        .background(Color.chatListRowBackground)
         .contentShape(.rect)
         .animation(.smooth(duration: 0.2), value: customChat.unreadCount)
     }

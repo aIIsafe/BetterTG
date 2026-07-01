@@ -1,5 +1,6 @@
 // ChatsListItemView.swift
 
+import Foundation
 import SwiftUI
 import TDLibKit
 
@@ -36,7 +37,7 @@ struct ChatsListItemView: View {
                     Spacer()
                     
                     if let lastMessage = customChat.lastMessage {
-                        Text(lastMessageTime(Date(timeIntervalSince1970: Double(lastMessage.date))))
+                        Text(lastMessageTime(Foundation.Date(timeIntervalSince1970: Double(lastMessage.date))))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
@@ -68,7 +69,7 @@ struct ChatsListItemView: View {
         .animation(.smooth(duration: 0.2), value: customChat.unreadCount)
     }
 
-    private func lastMessageTime(_ date: Date) -> String {
+    private func lastMessageTime(_ date: Foundation.Date) -> String {
         let cal = Calendar.current
         if cal.isDateInToday(date) {
             let fmt = DateFormatter()

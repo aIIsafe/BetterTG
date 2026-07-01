@@ -52,7 +52,7 @@ struct ChatView: View {
             ToolbarItem(placement: .principal) { principal }
             ToolbarItem(placement: .topBarTrailing) { topBarTrailing }
         }
-        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(Color(red: 0.10, green: 0.14, blue: 0.26, opacity: 0.95), for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .environment(chatVM)
         .onChange(of: focused) { chatVM.focused = focused }

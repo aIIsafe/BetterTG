@@ -9,14 +9,17 @@ extension Color {
     static let gray3 = Color(uiColor: .systemGray3)
     static let gray2 = Color(uiColor: .systemGray2)
 
-    // AnyGram theme
-    static let chatBackground = Color(red: 0.06, green: 0.12, blue: 0.22, opacity: 1)
-    // Incoming: slightly translucent dark, reads well on the blue gradient
-    static let bubbleIncoming = Color(red: 0.13, green: 0.17, blue: 0.27, opacity: 1)
-    // Outgoing: bright saturated blue, stands out from the background
-    static let bubbleOutgoing = Color(red: 0.17, green: 0.46, blue: 0.82, opacity: 1)
-    // Chat list row overlay: subtle dark tint for readability
-    static let chatListRowBackground = Color(red: 0.04, green: 0.09, blue: 0.18, opacity: 0.55)
+    // AnyGram theme — blue palette from the icon
+    /// Dark background for the main chat list (like Telegram dark mode)
+    static let appDark = Color(red: 0.11, green: 0.11, blue: 0.12, opacity: 1)
+    /// Placeholder, kept for API compat
+    static let chatBackground = Color(red: 0.11, green: 0.11, blue: 0.12, opacity: 1)
+    /// Incoming bubble: dark navy — readable on the blue gradient
+    static let bubbleIncoming = Color(red: 0.14, green: 0.17, blue: 0.28, opacity: 1)
+    /// Outgoing bubble: icon primary blue #2E9CF5
+    static let bubbleOutgoing = Color(red: 0.18, green: 0.61, blue: 0.96, opacity: 1)
+    /// Subtle transparent row tint for chat list on dark background
+    static let chatListRowBackground = Color.clear
 
     init(red: Int, green: Int, blue: Int, opacity: Double) {
         self.init(.sRGB, red: Double(red / 255), green: Double(green / 255), blue: Double(blue / 255), opacity: opacity)

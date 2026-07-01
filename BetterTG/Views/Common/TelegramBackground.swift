@@ -1,8 +1,7 @@
 // TelegramBackground.swift
+// Animated chat wallpaper – pure blue palette matching the AnyGram icon
 
 import SwiftUI
-
-// MARK: - Telegram animated mesh gradient background
 
 struct TelegramBackground: View {
     @State private var phase: CGFloat = 0
@@ -12,13 +11,13 @@ struct TelegramBackground: View {
             if #available(iOS 18.0, *) {
                 AnimatedMeshBackground(phase: phase)
             } else {
-                FallbackGradientBackground()
+                FallbackGradientBackground(phase: phase)
             }
         }
         .ignoresSafeArea()
         .onAppear {
             withAnimation(
-                .easeInOut(duration: 9)
+                .easeInOut(duration: 10)
                 .repeatForever(autoreverses: true)
             ) {
                 phase = 1
@@ -33,29 +32,29 @@ struct TelegramBackground: View {
 private struct AnimatedMeshBackground: View {
     let phase: CGFloat
 
-    // Telegram-style dark blue/teal palette
-    private let colors: [Color] = [
-        Color(r: 11, g: 26, b: 56),   // top-left:     deep navy
-        Color(r: 9,  g: 41, b: 82),   // top-center:   dark blue
-        Color(r: 14, g: 52, b: 75),   // top-right:    blue-teal
+    // Sky-blue palette extracted from the AnyGram icon
+    // No green / no teal – only blues
+    private let baseColors: [Color] = [
+        Color(r: 14,  g: 38,  b: 105),  // top-left:      deep navy
+        Color(r: 18,  g: 58,  b: 145),  // top-center:    royal blue
+        Color(r: 20,  g: 72,  b: 165),  // top-right:     bright blue
 
-        Color(r: 7,  g: 58, b: 78),   // mid-left:     teal
-        Color(r: 12, g: 45, b: 95),   // center:       medium blue  ← brightest
-        Color(r: 9,  g: 78, b: 80),   // mid-right:    cyan-teal
+        Color(r: 12,  g: 45,  b: 130),  // mid-left:      mid-blue
+        Color(r: 46,  g: 156, b: 245),  // center:        icon primary ← brightest
+        Color(r: 25,  g: 90,  b: 200),  // mid-right:     sky blue
 
-        Color(r: 8,  g: 22, b: 52),   // bottom-left:  deep navy
-        Color(r: 7,  g: 36, b: 70),   // bottom-center:navy blue
-        Color(r: 13, g: 55, b: 72),   // bottom-right: blue-teal
+        Color(r: 10,  g: 28,  b: 85),   // bottom-left:   dark navy
+        Color(r: 16,  g: 52,  b: 138),  // bottom-center: deep blue
+        Color(r: 18,  g: 68,  b: 160),  // bottom-right:  blue
     ]
 
-    // Animate the 4 interior/edge control points
     private func points(_ t: Float) -> [SIMD2<Float>] {
-        let s = sin(t * .pi) * 0.12
-        let c = cos(t * .pi) * 0.08
+        let s = sin(t * .pi) * 0.13
+        let c = cos(t * .pi) * 0.07
         return [
-            [0,   0  ], [0.5,        0          ], [1,   0  ],
-            [0,   0.5 + s], [0.5 + c, 0.5       ], [1,   0.5 - s],
-            [0,   1  ], [0.5,        1          ], [1,   1  ],
+            [0,   0            ], [0.5,      0       ], [1,   0],
+            [0,   0.5 + s      ], [0.5 + c,  0.5     ], [1,   0.5 - s],
+            [0,   1            ], [0.5,      1       ], [1,   1],
         ]
     }
 
@@ -64,33 +63,27 @@ private struct AnimatedMeshBackground: View {
             width: 3,
             height: 3,
             points: points(Float(phase)),
-            colors: colors,
+            colors: baseColors,
             smoothsColors: true
         )
-        .animation(.easeInOut(duration: 9).repeatForever(autoreverses: true), value: phase)
     }
 }
 
 // MARK: - Fallback for iOS < 18
 
 private struct FallbackGradientBackground: View {
-    @State private var isAnimating = false
+    let phase: CGFloat
 
     var body: some View {
         LinearGradient(
             stops: [
-                .init(color: Color(r: 11, g: 26, b: 56), location: 0),
-                .init(color: Color(r: 9,  g: 78, b: 80), location: isAnimating ? 0.6 : 0.4),
-                .init(color: Color(r: 8,  g: 22, b: 52), location: 1),
+                .init(color: Color(r: 10, g: 28, b: 85),  location: 0),
+                .init(color: Color(r: 46, g: 156, b: 245), location: phase * 0.6 + 0.2),
+                .init(color: Color(r: 14, g: 38, b: 105), location: 1),
             ],
-            startPoint: isAnimating ? .topLeading : .bottomTrailing,
-            endPoint:   isAnimating ? .bottomTrailing : .topLeading
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
-        .onAppear {
-            withAnimation(.easeInOut(duration: 9).repeatForever(autoreverses: true)) {
-                isAnimating = true
-            }
-        }
     }
 }
 

@@ -55,24 +55,24 @@ struct FolderView: View {
                     .frame(height: navigationBarHeight)
                     .id("top")
                 if chats.isEmpty {
-                    Text("No chats")
+                    Text("Нет чатов")
                         .foregroundStyle(.secondary)
                         .padding(.top, 40)
                 } else {
-                    ForEach(Array(chats.enumerated()), id: \.element.id) { index, customChat in
+                    ForEach(chats) { customChat in
                         Button {
-                            withAnimation(.smooth(duration: 0.25)) {
+                            withAnimation(.smooth(duration: 0.22)) {
                                 navigationStorage.push(.customChat(customChat))
                             }
                         } label: {
                             VStack(spacing: 0) {
                                 ChatsListItemView(folder: folder, customChat: customChat)
                                     .matchedGeometryEffect(id: customChat.chat.id, in: namespace)
-                                if index < chats.count - 1 {
-                                    Divider()
-                                        .padding(.leading, 82)
-                                        .opacity(0.4)
-                                }
+                                // Thin separator like Telegram
+                                Rectangle()
+                                    .fill(Color(red: 0.22, green: 0.22, blue: 0.24, opacity: 1))
+                                    .frame(height: 0.5)
+                                    .padding(.leading, 82)
                             }
                         }
                         .buttonStyle(.plain)
@@ -102,6 +102,7 @@ struct FolderView: View {
                     .id("bottom")
             }
         }
+        .background(Color.appDark)
         .scrollIndicators(.hidden)
     }
     

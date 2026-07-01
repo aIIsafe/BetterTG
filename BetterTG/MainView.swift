@@ -120,7 +120,7 @@ private struct MainNavigationRootView: View {
                     .readSize { control.setWidth($0.width, forSegmentAt: index) }
                 },
             )
-            .glassEffect()
+            .compatibleGlassEffect()
         }
         .scrollIndicators(.hidden)
         .scrollPosition($rootVM.scrollPosition, anchor: .center)

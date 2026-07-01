@@ -69,7 +69,7 @@ import SwiftUI
             try audioSession.setActive(false)
             try audioSession.setCategory(.playAndRecord, mode: .default, policy: .default, options: [
                 .allowAirPlay,
-                .allowBluetoothHFP,
+                .allowBluetooth,
                 .allowBluetoothA2DP,
                 .defaultToSpeaker,
                 .overrideMutedMicrophoneInterruption,
@@ -189,7 +189,7 @@ import SwiftUI
         do {
             try audioSession.setActive(false)
             try audioSession.setCategory(.playback, mode: .spokenAudio, policy: .default, options: [
-                .allowBluetoothHFP,
+                .allowBluetooth,
                 .allowBluetoothA2DP,
             ])
             try audioSession.setActive(true)

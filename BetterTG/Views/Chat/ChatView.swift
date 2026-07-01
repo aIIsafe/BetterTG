@@ -112,7 +112,7 @@ struct ChatView: View {
         .scrollDismissesKeyboard(.interactively)
         .scrollBounceBehavior(.always)
         .scrollIndicators(.hidden)
-        .scrollEdgeEffectHidden(true, for: .all)
+        .compatibleScrollEdgeEffectHidden()
         .onTapGesture { focused = false }
         .animation(.default, value: chatVM.extraBottomPadding)
         .overlay(alignment: .bottomTrailing) {
@@ -197,7 +197,7 @@ struct ChatView: View {
         .frame(minWidth: Utils.screen.bounds.width * 0.5)
         .padding(.horizontal, 12)
         .frame(height: 44)
-        .glassEffect(.regular.interactive())
+        .compatibleGlassEffectInteractive()
     }
     
     @ViewBuilder private var topBarTrailing: some View {

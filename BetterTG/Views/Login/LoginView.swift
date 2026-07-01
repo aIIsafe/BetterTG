@@ -8,19 +8,23 @@ struct LoginView: View {
     // MARK: Internal
 
     @State var loginState = LoginState.phoneNumber
-    
+
     @State var showSelectCountryView = false
     @State var selectedCountryNum = PhoneNumberInfo(country: "RU", phoneNumberPrefix: "7", name: "Russian Federation")
-    
+
     @State var phoneNumber = ""
+    @State var email = ""
+    @State var emailCode = ""
     @State var code = ""
     @State var hint = ""
     @State var twoFactor = ""
-    
+
     @State var errorShown = false
+    @State var errorMessage = ""
     @State var waitPremiumErrorShown = false
+    @State var isSubmitting = false
     @FocusState var focused: LoginState?
-    
+
     var body: some View {
         ZStack {
             Group {
@@ -30,10 +34,11 @@ struct LoginView: View {
                         GroupBox {
                             HStack {
                                 Text("+\(selectedCountryNum.phoneNumberPrefix)")
-                                    
+
                                 TextField("Phone Number", text: $phoneNumber)
                                     .focused($focused, equals: .phoneNumber)
-                                    .keyboardType(.numberPad)
+                                    .keyboardType(.phonePad)
+                                    .textContentType(.telephoneNumber)
                             }
                         } label: {
                             Button(selectedCountryNum.name) {
@@ -48,6 +53,27 @@ struct LoginView: View {
                         )
                         .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.hidden)
+                    }
+                case .email:
+                    loginStateView {
+                        TextField("Email", text: $email)
+                            .focused($focused, equals: .email)
+                            .keyboardType(.emailAddress)
+                            .textContentType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .padding()
+                            .background(Color.gray6)
+                            .clipShape(.rect(cornerRadius: 10))
+                    }
+                case .emailCode:
+                    loginStateView {
+                        TextField("Email code", text: $emailCode)
+                            .focused($focused, equals: .emailCode)
+                            .keyboardType(.numberPad)
+                            .padding()
+                            .background(Color.gray6)
+                            .clipShape(.rect(cornerRadius: 10))
                     }
                 case .code:
                     loginStateView {
@@ -81,58 +107,45 @@ struct LoginView: View {
         .animation(.default, value: loginState)
         .safeAreaInset(edge: .bottom) {
             Button {
-                withAnimation {
-                    guard let focused else { return }
-                    self.focused =
-                        switch focused {
-                        case .phoneNumber: .code
-                        case .code: .twoFactor
-                        case .twoFactor: nil
-                        }
-                }
-                Task.background {
-                    switch try? await td.getAuthorizationState() {
-                    case .authorizationStateWaitPassword:
-                        _ = try? await td.checkAuthenticationPassword(password: twoFactor)
-                    case .authorizationStateWaitCode:
-                        _ = try? await td.checkAuthenticationCode(code: code)
-                    case .authorizationStateWaitPhoneNumber:
-                        _ = try? await td.setAuthenticationPhoneNumber(
-                            phoneNumber: "\(selectedCountryNum.phoneNumberPrefix)\(phoneNumber)",
-                            settings: nil,
-                        )
-                    default:
-                        break
+                Task { await handleContinue() }
+            } label: {
+                Group {
+                    if isSubmitting {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                    } else {
+                        Text("Continue")
+                            .padding(.vertical, 5)
+                            .frame(maxWidth: .infinity)
                     }
                 }
-            } label: {
-                Text("Continue")
-                    .padding(.vertical, 5)
-                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .disabled(isSubmitting || !canContinue)
             .padding()
         }
         .alert("Error", isPresented: $errorShown) {
-            Text("There was an error with Authorization State. Please, restart the app.")
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
         .alert("Error", isPresented: $waitPremiumErrorShown) {
+            Button("OK", role: .cancel) {}
+        } message: {
             Text("In order to login, you need to upgrade to Telegram Premium. Please, do it in the Telegram app.")
         }
         .task {
-            switch try? await td.getAuthorizationState() {
-            case .authorizationStateWaitPassword: loginState = .twoFactor
-            case .authorizationStateWaitCode: loginState = .code
-            case .authorizationStateClosed, .authorizationStateClosing, .authorizationStateLoggingOut:
-                errorShown = true
-            case .authorizationStateWaitPremiumPurchase:
-                waitPremiumErrorShown = true
-            default: break
-            }
+            await syncLoginStateFromAuthorization()
         }
-        .onAppear(perform: setPublishers)
+        .onAppear {
+            setPublishers()
+            focused = loginState
+        }
+        .onChange(of: loginState) { _, newValue in
+            focused = newValue
+        }
     }
-    
+
     func loginStateView(_ content: () -> some View) -> some View {
         VStack(spacing: 10) {
             Spacer()
@@ -148,7 +161,129 @@ struct LoginView: View {
     // MARK: Private
 
     @State private var cancellables = Set<AnyCancellable>()
-    
+
+    private var canContinue: Bool {
+        switch loginState {
+        case .phoneNumber:
+            !phoneDigits.isEmpty
+        case .email:
+            email.contains("@")
+        case .emailCode:
+            !emailCode.isEmpty
+        case .code:
+            !code.isEmpty
+        case .twoFactor:
+            !twoFactor.isEmpty
+        }
+    }
+
+    private var phoneDigits: String {
+        phoneNumber.filter(\.isNumber)
+    }
+
+    private var fullPhoneNumber: String {
+        "+\(selectedCountryNum.phoneNumberPrefix)\(phoneDigits)"
+    }
+
+    private func showError(_ message: String) async {
+        await MainActor.run {
+            errorMessage = message
+            errorShown = true
+        }
+    }
+
+    private func syncLoginStateFromAuthorization() async {
+        guard let authState = try? await td.getAuthorizationState() else { return }
+        await MainActor.run { applyAuthorizationState(authState) }
+    }
+
+    @MainActor
+    private func applyAuthorizationState(_ authState: AuthorizationState) {
+        switch authState {
+        case .authorizationStateWaitPhoneNumber:
+            loginState = .phoneNumber
+        case .authorizationStateWaitEmailAddress:
+            loginState = .email
+        case .authorizationStateWaitEmailCode:
+            loginState = .emailCode
+        case .authorizationStateWaitCode:
+            loginState = .code
+        case .authorizationStateWaitPassword(let waitPassword):
+            loginState = .twoFactor
+            hint = waitPassword.passwordHint
+        case .authorizationStateClosed, .authorizationStateClosing, .authorizationStateLoggingOut:
+            errorMessage = "Authorization failed. Please restart the app."
+            errorShown = true
+        case .authorizationStateWaitPremiumPurchase:
+            waitPremiumErrorShown = true
+        default:
+            break
+        }
+    }
+
+    private func handleContinue() async {
+        await MainActor.run { isSubmitting = true }
+        defer { Task { await MainActor.run { isSubmitting = false } } }
+
+        do {
+            let authState = try await td.getAuthorizationState()
+
+            switch authState {
+            case .authorizationStateWaitPhoneNumber:
+                guard !phoneDigits.isEmpty else {
+                    await showError("Enter your phone number.")
+                    return
+                }
+                try await td.setAuthenticationPhoneNumber(
+                    phoneNumber: fullPhoneNumber,
+                    settings: nil,
+                )
+
+            case .authorizationStateWaitEmailAddress:
+                let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard trimmedEmail.contains("@") else {
+                    await showError("Enter a valid email address.")
+                    return
+                }
+                try await td.setAuthenticationEmailAddress(
+                    emailAddress: trimmedEmail,
+                    allowUserSecretEmails: true,
+                    onlyAllowLoginEmails: false,
+                )
+
+            case .authorizationStateWaitEmailCode:
+                guard !emailCode.isEmpty else {
+                    await showError("Enter the code from your email.")
+                    return
+                }
+                try await td.checkAuthenticationEmailCode(code: emailCode)
+
+            case .authorizationStateWaitCode:
+                guard !code.isEmpty else {
+                    await showError("Enter the code from Telegram.")
+                    return
+                }
+                try await td.checkAuthenticationCode(code: code)
+
+            case .authorizationStateWaitPassword:
+                guard !twoFactor.isEmpty else {
+                    await showError("Enter your password.")
+                    return
+                }
+                try await td.checkAuthenticationPassword(password: twoFactor)
+
+            case .authorizationStateWaitTdlibParameters:
+                await showError("App is still starting. Wait a few seconds and try again.")
+
+            default:
+                await showError("Cannot continue right now. Restart the app and try again.")
+            }
+        } catch {
+            log("Login error: \(error)")
+            await showError(error.localizedDescription)
+        }
+    }
+
     private func setPublishers() {
         nc.publisher(&cancellables, for: .authorizationStateWaitPassword) { notification in
             guard let waitPassword = notification.object as? AuthorizationStateWaitPassword else { return }
@@ -159,6 +294,12 @@ struct LoginView: View {
         }
         nc.publisher(&cancellables, for: .authorizationStateWaitCode) { _ in
             Task.main { loginState = .code }
+        }
+        nc.publisher(&cancellables, for: .authorizationStateWaitEmailAddress) { _ in
+            Task.main { loginState = .email }
+        }
+        nc.publisher(&cancellables, for: .authorizationStateWaitEmailCode) { _ in
+            Task.main { loginState = .emailCode }
         }
         nc.mergeMany(&cancellables, [
             .authorizationStateWaitPhoneNumber,

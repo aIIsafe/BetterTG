@@ -1,0 +1,52 @@
+GitHub Actions signing setup for BetterTG
+=========================================
+
+Required repository secrets (Settings -> Secrets and variables -> Actions):
+
+Telegram
+--------
+TELEGRAM_API_ID          Number from https://my.telegram.org/
+TELEGRAM_API_HASH        Hash from https://my.telegram.org/
+
+Apple code signing
+------------------
+APPLE_TEAM_ID            10-character Team ID (developer.apple.com/account)
+PRODUCT_BUNDLE_IDENTIFIER  Unique bundle id, e.g. com.yourname.BetterTG
+
+BUILD_CERTIFICATE_BASE64 Base64 of your .p12 development certificate
+P12_PASSWORD             Password used when exporting the .p12
+BUILD_PROVISION_PROFILE_BASE64  Base64 of .mobileprovision for iOS App Development
+KEYCHAIN_PASSWORD        Any random string (used only inside the CI runner)
+
+How to create certificate + profile (one-time, needs any Mac once)
+------------------------------------------------------------------
+1. Register at https://developer.apple.com (free Apple ID works for sideloading).
+2. Create an App ID with bundle id matching PRODUCT_BUNDLE_IDENTIFIER.
+3. Create an "Apple Development" certificate in Certificates, Identifiers & Profiles.
+4. Create an iOS App Development provisioning profile for that App ID.
+5. Download the profile. Install cert + profile on a Mac via Xcode or double-click.
+6. Export certificate from Keychain Access as .p12 with a password.
+
+Convert files to base64 for GitHub secrets
+------------------------------------------
+On Mac:
+  base64 -i certificate.p12 | pbcopy
+  base64 -i profile.mobileprovision | pbcopy
+
+On Windows PowerShell:
+  [Convert]::ToBase64String([IO.File]::ReadAllBytes("certificate.p12")) | Set-Clipboard
+  [Convert]::ToBase64String([IO.File]::ReadAllBytes("profile.mobileprovision")) | Set-Clipboard
+
+Run the workflow
+----------------
+Actions -> Build BetterTG IPA -> Run workflow
+
+Download IPA
+------------
+After a green run: Artifacts -> BetterTG-ipa -> download -> install with Sideloadly on iPhone.
+
+Notes
+-----
+- Free Apple ID profiles expire in ~7 days; rebuild and reinstall when needed.
+- Use your own bundle id, not com.levochkaaa.BetterTG, unless you own that App ID.
+- macOS runner minutes bill at 10x on private repos; public forks may use free minutes.

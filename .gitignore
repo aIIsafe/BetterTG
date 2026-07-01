@@ -4,7 +4,9 @@
 .vscode
 
 xcuserdata/
-xcshareddata/
+xcshareddata/*
+!xcshareddata/xcschemes/
+!xcshareddata/xcschemes/**
 
 Secret.swift
 

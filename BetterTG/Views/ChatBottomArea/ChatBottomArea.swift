@@ -41,7 +41,7 @@ struct ChatBottomArea: View {
         .alert("Error", isPresented: $chatVM.errorShown) {
             Text("""
             Access to Microphone isn't granted.
-            Go to Settings -> BetterTG -> Microphone
+            Go to Settings -> AnyGram -> Microphone
             if you want to record Voice
             """)
         }

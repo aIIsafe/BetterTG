@@ -47,7 +47,7 @@ private struct MainNavigationRootView: View {
         .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("BetterTG")
+        .navigationTitle("AnyGram")
         .navigationBarHeight($navigationBarHeight.animation())
         .searchable(
             text: $rootVM.query,

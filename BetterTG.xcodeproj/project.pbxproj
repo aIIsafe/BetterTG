@@ -340,7 +340,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BetterTG/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = BetterTG;
+				INFOPLIST_KEY_CFBundleDisplayName = AnyGram;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We would like to access your Camera to let you send photos in chats.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We would like to access your Microphone to let you send Voice messages in chats.";
@@ -389,7 +389,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BetterTG/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = BetterTG;
+				INFOPLIST_KEY_CFBundleDisplayName = AnyGram;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We would like to access your Camera to let you send photos in chats.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We would like to access your Microphone to let you send Voice messages in chats.";

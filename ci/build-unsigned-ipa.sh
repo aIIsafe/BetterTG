@@ -21,7 +21,7 @@ xcodebuild build \
   CODE_SIGN_IDENTITY="-" \
   DEVELOPMENT_TEAM="" \
   PROVISIONING_PROFILE_SPECIFIER="" \
-  IPHONEOS_DEPLOYMENT_TARGET=17.0
+  IPHONEOS_DEPLOYMENT_TARGET=26.0
 
 APP_PATH="$(find "$DERIVED_DATA" -path "*/Build/Products/Release-iphoneos/BetterTG.app" -type d | head -1)"
 if [[ -z "$APP_PATH" || ! -d "$APP_PATH" ]]; then

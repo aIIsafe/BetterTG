@@ -2,10 +2,19 @@
 
 import SwiftUI
 
+private struct ScrollEdgeEffectHiddenModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.scrollEdgeEffectHidden(true, for: .all)
+        } else {
+            content
+        }
+    }
+}
+
 extension View {
-    @ViewBuilder
     func compatibleScrollEdgeEffectHidden() -> some View {
-        self
+        modifier(ScrollEdgeEffectHiddenModifier())
     }
 
     @ViewBuilder

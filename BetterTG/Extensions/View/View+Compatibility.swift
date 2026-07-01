@@ -5,11 +5,7 @@ import SwiftUI
 extension View {
     @ViewBuilder
     func compatibleScrollEdgeEffectHidden() -> some View {
-        if #available(iOS 26.0, *) {
-            self.scrollEdgeEffectHidden(true, for: .all)
-        } else {
-            self
-        }
+        self
     }
 
     @ViewBuilder

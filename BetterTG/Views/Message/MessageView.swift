@@ -8,6 +8,8 @@ struct MessageView: View {
 
     @Environment(ChatVM.self) var chatVM
     
+    private var isOutgoing: Bool { customMessage.message.isOutgoing }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             if let forwardedFrom = customMessage.forwardedFrom {
@@ -31,26 +33,44 @@ struct MessageView: View {
             
             if let formattedText = customMessage.formattedText {
                 MessageTextView(formattedText: formattedText)
-                    .padding(8)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
                     .padding(
                         .top,
                         customMessage.replyUser != nil && customMessage.replyToMessage != nil
-                            || customMessage.forwardedFrom != nil ? -8 : 0,
+                            || customMessage.forwardedFrom != nil ? -4 : 0,
                     )
             }
         }
-        .background(chatVM.highlightedMessageId == customMessage.id ? .white.opacity(0.5) : .gray6)
-        .clipShape(.rect(cornerRadius: 20))
+        .background(bubbleColor)
+        .clipShape(bubbleShape)
         .overlay(alignment: .bottomTrailing) {
             Text(chatVM.dateFormatter.string(from: customMessage.date))
-                .font(.system(size: 12))
-                .foregroundStyle(.white)
-                .padding(3)
-                .background(Color.gray6)
-                .clipShape(.rect(cornerRadius: 10))
-                .padding(5)
-                .opacity(0.5)
+                .font(.system(size: 11, weight: .regular))
+                .foregroundStyle(.white.opacity(0.7))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(.black.opacity(0.25))
+                .clipShape(.capsule)
+                .padding([.trailing, .bottom], 5)
         }
-        .customContextMenu(cornerRadius: 20, contextMenuActions)
+        .shadow(color: .black.opacity(0.15), radius: 3, x: 0, y: 1)
+        .scaleEffect(
+            chatVM.highlightedMessageId == customMessage.id ? 1.02 : 1.0,
+            anchor: isOutgoing ? .bottomTrailing : .bottomLeading,
+        )
+        .animation(.spring(duration: 0.2), value: chatVM.highlightedMessageId)
+        .customContextMenu(cornerRadius: 18, contextMenuActions)
+    }
+
+    private var bubbleColor: Color {
+        if chatVM.highlightedMessageId == customMessage.id {
+            return isOutgoing ? Color.bubbleOutgoing.opacity(0.7) : .white.opacity(0.15)
+        }
+        return isOutgoing ? Color.bubbleOutgoing : Color.bubbleIncoming
+    }
+
+    private var bubbleShape: some Shape {
+        RoundedRectangle(cornerRadius: 18, style: .continuous)
     }
 }

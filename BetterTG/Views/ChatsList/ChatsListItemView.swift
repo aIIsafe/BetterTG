@@ -8,20 +8,12 @@ struct ChatsListItemView: View {
     @State var customChat: CustomChat
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             if customChat.position.isPinned {
-                Button(systemImage: "pin.fill") {
-                    Task.background {
-                        try await td.toggleChatIsPinned(
-                            chatId: customChat.chat.id,
-                            chatList: folder.chatList,
-                            isPinned: !customChat.position.isPinned,
-                        )
-                    }
-                }
-                .font(.title2)
-                .foregroundStyle(.white)
-                .padding(.leading, 10)
+                Image(systemName: "pin.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(45))
             }
             
             let chat = customChat.chat
@@ -30,38 +22,64 @@ struct ChatsListItemView: View {
                 minithumbnail: chat.photo?.minithumbnail,
                 title: chat.title,
                 userId: chat.id,
-                fontSize: 40,
+                fontSize: 24,
             )
-            .frame(width: 64, height: 64)
+            .frame(width: 54, height: 54)
             
-            VStack(alignment: .leading, spacing: 0) {
-                Text(customChat.chat.title)
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                
-                LastOrDraftMessageView(customChat: customChat)
-            }
-            .lineLimit(1)
-            
-            if customChat.unreadCount != 0 {
-                Spacer()
-                
-                Circle()
-                    .fill(.gray)
-                    .frame(width: 32, height: 32)
-                    .overlay {
-                        Text("\(customChat.unreadCount)")
-                            .font(.callout)
-                            .foregroundStyle(.white)
-                            .minimumScaleFactor(0.5)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack {
+                    Text(customChat.chat.title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    if let lastMessage = customChat.lastMessage {
+                        Text(lastMessageTime(lastMessage.date))
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
                     }
-                    .padding(.trailing, 10)
+                }
+                
+                HStack {
+                    LastOrDraftMessageView(customChat: customChat)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    if customChat.unreadCount > 0 {
+                        Text("\(customChat.unreadCount)")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(.blue)
+                            .clipShape(.capsule)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(5)
-        .background(Color.gray6)
-        .clipShape(.rect(cornerRadius: 20))
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .contentShape(.rect)
+        .animation(.smooth(duration: 0.2), value: customChat.unreadCount)
+    }
+
+    private func lastMessageTime(_ date: Date) -> String {
+        let cal = Calendar.current
+        if cal.isDateInToday(date) {
+            let fmt = DateFormatter()
+            fmt.dateFormat = "HH:mm"
+            return fmt.string(from: date)
+        } else if cal.isDateInYesterday(date) {
+            return "Yesterday"
+        } else {
+            let fmt = DateFormatter()
+            fmt.dateFormat = "dd.MM.yy"
+            return fmt.string(from: date)
+        }
     }
 }

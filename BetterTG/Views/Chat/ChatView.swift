@@ -29,8 +29,9 @@ struct ChatView: View {
         .overlay {
             if chatVM.customChat.lastMessage == nil {
                 Text("No messages")
+                    .foregroundStyle(.white.opacity(0.5))
                     .frame(maxHeight: .infinity)
-                    .background(.black)
+                    .background(Color.chatBackground)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -55,7 +56,7 @@ struct ChatView: View {
     
     var bodyView: some View {
         ScrollView {
-            LazyVStack(spacing: 5) {
+            LazyVStack(spacing: 6) {
                 ForEach(chatVM.messages) { customMessage in
                     HStack(alignment: .bottom, spacing: 0) {
                         if customMessage.message.isOutgoing { Spacer(minLength: 0) } else {
@@ -70,13 +71,13 @@ struct ChatView: View {
                                         title: user.firstName,
                                         userId: user.id,
                                     )
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: 30, height: 30)
                                 } else {
                                     Spacer()
-                                        .frame(width: 32, height: 32)
+                                        .frame(width: 30, height: 30)
                                 }
                                 Spacer()
-                                    .frame(width: 5)
+                                    .frame(width: 6)
                             }
                         }
                         
@@ -92,10 +93,10 @@ struct ChatView: View {
                         
                         if !customMessage.message.isOutgoing { Spacer(minLength: 0) }
                     }
-                    .padding(customMessage.message.isOutgoing ? .trailing : .leading, 16)
+                    .padding(customMessage.message.isOutgoing ? .trailing : .leading, 12)
                     .transition(
                         .asymmetric(
-                            insertion: .move(edge: .top),
+                            insertion: .push(from: customMessage.message.isOutgoing ? .trailing : .leading),
                             removal: .move(edge: customMessage.message.isOutgoing ? .trailing : .leading),
                         )
                         .combined(with: .opacity),
@@ -104,9 +105,10 @@ struct ChatView: View {
                 }
             }
             .padding(.top, chatVM.extraBottomPadding)
+            .padding(.horizontal, 4)
             .readOffset(in: .named(chatVM.chatScrollNamespaceId), onChange: chatVM.onPreferenceChange)
         }
-        .background(.black)
+        .background(Color.chatBackground)
         .flipped()
         .coordinateSpace(name: chatVM.chatScrollNamespaceId)
         .scrollDismissesKeyboard(.interactively)
@@ -114,51 +116,58 @@ struct ChatView: View {
         .scrollIndicators(.hidden)
         .compatibleScrollEdgeEffectHidden()
         .onTapGesture { focused = false }
-        .animation(.default, value: chatVM.extraBottomPadding)
+        .animation(.smooth(duration: 0.3), value: chatVM.extraBottomPadding)
         .overlay(alignment: .bottomTrailing) {
             if chatVM.showScrollToBottomButton {
                 scrollToBottomButton
-                    .padding(.bottom, chatVM.extraBottomPadding)
+                    .padding(.bottom, chatVM.extraBottomPadding + 8)
+                    .padding(.trailing, 12)
             }
         }
+        // Тонкий градиент только для navbar (не тёмный)
         .overlay(alignment: .top) {
-            LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
-                .frame(height: topGradientHeight)
-        }
-        .overlay(alignment: .bottom) {
-            LinearGradient(colors: [.black, .clear], startPoint: .bottom, endPoint: .top)
-                .frame(height: bottomGradientHeight)
+            LinearGradient(
+                colors: [Color.chatBackground.opacity(0.85), Color.chatBackground.opacity(0)],
+                startPoint: .top,
+                endPoint: .bottom,
+            )
+            .frame(height: topGradientHeight)
+            .allowsHitTesting(false)
         }
     }
     
     var scrollToBottomButton: some View {
-        Image(systemName: "chevron.down")
-            .offset(y: 1)
-            .font(.title3)
-            .padding(10)
-            .background(.black)
-            .clipShape(.circle)
-            .overlay {
-                Circle()
-                    .stroke(.blue, lineWidth: 1)
-            }
-            .overlay(alignment: .top) {
-                if chatVM.customChat.unreadCount != 0 {
-                    Circle()
-                        .fill(.blue)
-                        .frame(width: 16, height: 16)
-                        .overlay {
-                            Text("\(chatVM.customChat.unreadCount)")
-                                .font(.caption)
-                                .foregroundStyle(.white)
-                                .minimumScaleFactor(0.5)
-                        }
-                        .offset(y: -5)
+        Button(action: chatVM.scrollToLast) {
+            Image(systemName: "chevron.down")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 36, height: 36)
+                .background(.ultraThinMaterial)
+                .clipShape(.circle)
+                .overlay {
+                    Circle().stroke(.white.opacity(0.15), lineWidth: 0.5)
                 }
-            }
-            .transition(.move(edge: .bottom).combined(with: .scale).combined(with: .opacity))
-            .padding(.trailing)
-            .onTapGesture(perform: chatVM.scrollToLast)
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
+                .overlay(alignment: .top) {
+                    if chatVM.customChat.unreadCount != 0 {
+                        Text("\(chatVM.customChat.unreadCount)")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(.blue)
+                            .clipShape(.capsule)
+                            .offset(y: -8)
+                    }
+                }
+        }
+        .transition(
+            .asymmetric(
+                insertion: .scale(scale: 0.7).combined(with: .opacity),
+                removal: .scale(scale: 0.7).combined(with: .opacity),
+            )
+            .animation(.spring(duration: 0.25)),
+        )
     }
     
     // MARK: Private
@@ -169,19 +178,19 @@ struct ChatView: View {
         UIApplication.safeAreaInsets.top + navigationBarHeight
     }
 
-    private var bottomGradientHeight: CGFloat {
-        UIApplication.safeAreaInsets.bottom + chatVM.bottomAreaHeight
-    }
-
     private var principal: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 1) {
             Text(chatVM.customChat.chat.title)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
             
             Group {
                 if !chatVM.actionStatus.isEmpty {
                     Text(chatVM.actionStatus)
+                        .foregroundStyle(.blue)
                 } else if !chatVM.onlineStatus.isEmpty {
                     Text(chatVM.onlineStatus)
+                        .foregroundStyle(chatVM.onlineStatus == "online" ? .green : .secondary)
                 }
             }
             .transition(
@@ -191,13 +200,12 @@ struct ChatView: View {
                 )
                 .combined(with: .opacity),
             )
-            .font(.caption)
-            .foregroundStyle(!chatVM.actionStatus.isEmpty || chatVM.onlineStatus == "online" ? .blue : .gray)
+            .font(.system(size: 12))
         }
-        .frame(minWidth: Utils.screen.bounds.width * 0.5)
-        .padding(.horizontal, 12)
-        .frame(height: 44)
-        .compatibleGlassEffectInteractive()
+        .frame(minWidth: Utils.screen.bounds.width * 0.45)
+        .padding(.horizontal, 10)
+        .animation(.smooth(duration: 0.2), value: chatVM.actionStatus)
+        .animation(.smooth(duration: 0.2), value: chatVM.onlineStatus)
     }
     
     @ViewBuilder private var topBarTrailing: some View {
@@ -209,5 +217,6 @@ struct ChatView: View {
             userId: chat.id,
         )
         .frame(width: 32, height: 32)
+        .shadow(color: .black.opacity(0.2), radius: 3)
     }
 }

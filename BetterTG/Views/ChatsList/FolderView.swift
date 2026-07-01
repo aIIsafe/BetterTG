@@ -50,20 +50,32 @@ struct FolderView: View {
     
     var bodyView: some View {
         ScrollView {
-            LazyVStack(spacing: 8) {
+            LazyVStack(spacing: 0) {
                 Spacer()
                     .frame(height: navigationBarHeight)
                     .id("top")
                 if chats.isEmpty {
-                    Text("Empty folder :(")
+                    Text("No chats")
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 40)
                 } else {
-                    ForEach(chats) { customChat in
+                    ForEach(Array(chats.enumerated()), id: \.element.id) { index, customChat in
                         Button {
-                            navigationStorage.push(.customChat(customChat))
+                            withAnimation(.smooth(duration: 0.25)) {
+                                navigationStorage.push(.customChat(customChat))
+                            }
                         } label: {
-                            ChatsListItemView(folder: folder, customChat: customChat)
-                                .matchedGeometryEffect(id: customChat.chat.id, in: namespace)
+                            VStack(spacing: 0) {
+                                ChatsListItemView(folder: folder, customChat: customChat)
+                                    .matchedGeometryEffect(id: customChat.chat.id, in: namespace)
+                                if index < chats.count - 1 {
+                                    Divider()
+                                        .padding(.leading, 82)
+                                        .opacity(0.4)
+                                }
+                            }
                         }
+                        .buttonStyle(.plain)
                         .contextMenu {
                             contextMenu(for: customChat)
                         } preview: {
@@ -90,7 +102,7 @@ struct FolderView: View {
                     .id("bottom")
             }
         }
-        .scrollIndicators(.visible)
+        .scrollIndicators(.hidden)
     }
     
     @ViewBuilder func contextMenu(for customChat: CustomChat) -> some View {

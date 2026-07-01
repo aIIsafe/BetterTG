@@ -50,6 +50,8 @@ struct ChatView: View {
             ToolbarItem(placement: .principal) { principal }
             ToolbarItem(placement: .topBarTrailing) { topBarTrailing }
         }
+        .toolbarBackground(Color.chatBackground, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .environment(chatVM)
         .onChange(of: focused) { chatVM.focused = focused }
     }
@@ -124,16 +126,6 @@ struct ChatView: View {
                     .padding(.trailing, 12)
             }
         }
-        // Тонкий градиент только для navbar (не тёмный)
-        .overlay(alignment: .top) {
-            LinearGradient(
-                colors: [Color.chatBackground.opacity(0.85), Color.chatBackground.opacity(0)],
-                startPoint: .top,
-                endPoint: .bottom,
-            )
-            .frame(height: topGradientHeight)
-            .allowsHitTesting(false)
-        }
     }
     
     var scrollToBottomButton: some View {
@@ -142,12 +134,12 @@ struct ChatView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 36, height: 36)
-                .background(.ultraThinMaterial)
+                .background(Color(red: 0.2, green: 0.2, blue: 0.22, opacity: 1))
                 .clipShape(.circle)
                 .overlay {
                     Circle().stroke(.white.opacity(0.15), lineWidth: 0.5)
                 }
-                .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
+                .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
                 .overlay(alignment: .top) {
                     if chatVM.customChat.unreadCount != 0 {
                         Text("\(chatVM.customChat.unreadCount)")
@@ -173,10 +165,6 @@ struct ChatView: View {
     // MARK: Private
 
     @State private var navigationBarHeight = CGFloat.zero
-
-    private var topGradientHeight: CGFloat {
-        UIApplication.safeAreaInsets.top + navigationBarHeight
-    }
 
     private var principal: some View {
         VStack(spacing: 1) {
@@ -217,6 +205,5 @@ struct ChatView: View {
             userId: chat.id,
         )
         .frame(width: 32, height: 32)
-        .shadow(color: .black.opacity(0.2), radius: 3)
     }
 }

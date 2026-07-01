@@ -36,7 +36,7 @@ struct ChatsListItemView: View {
                     Spacer()
                     
                     if let lastMessage = customChat.lastMessage {
-                        Text(lastMessageTime(lastMessage.date))
+                        Text(lastMessageTime(Date(timeIntervalSince1970: Double(lastMessage.date))))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }

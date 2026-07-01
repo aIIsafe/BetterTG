@@ -115,9 +115,9 @@ final class TDLib: @unchecked Sendable {
     private func configureDefaultProxy() async {
         do {
             _ = try await td.addProxy(
-                server: TelegramProxy.server,
-                port: TelegramProxy.port,
                 enable: true,
+                port: TelegramProxy.port,
+                server: TelegramProxy.server,
                 type: .proxyTypeMtproto(
                     ProxyTypeMtproto(secret: TelegramProxy.secret),
                 ),

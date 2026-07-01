@@ -245,18 +245,18 @@ struct LoginView: View {
                     await showError("Enter a valid email address.")
                     return
                 }
-                try await td.setAuthenticationEmailAddress(
-                    emailAddress: trimmedEmail,
-                    allowUserSecretEmails: true,
-                    onlyAllowLoginEmails: false,
-                )
+                try await td.setAuthenticationEmailAddress(emailAddress: trimmedEmail)
 
             case .authorizationStateWaitEmailCode:
                 guard !emailCode.isEmpty else {
                     await showError("Enter the code from your email.")
                     return
                 }
-                try await td.checkAuthenticationEmailCode(code: emailCode)
+                try await td.checkAuthenticationEmailCode(
+                    code: .emailAddressAuthenticationCode(
+                        EmailAddressAuthenticationCode(code: emailCode),
+                    ),
+                )
 
             case .authorizationStateWaitCode:
                 guard !code.isEmpty else {

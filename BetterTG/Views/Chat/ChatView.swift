@@ -28,12 +28,10 @@ struct ChatView: View {
         .ignoresSafeArea(.container)
         .overlay {
             if chatVM.customChat.lastMessage == nil {
-                ZStack {
-                    TelegramBackground()
-                    Text("No messages")
-                        .foregroundStyle(.white.opacity(0.5))
-                }
-                .frame(maxHeight: .infinity)
+                Text("No messages")
+                    .foregroundStyle(.white.opacity(0.5))
+                    .frame(maxHeight: .infinity)
+                    .background(Color.appDark)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -112,7 +110,7 @@ struct ChatView: View {
             .padding(.horizontal, 4)
             .readOffset(in: .named(chatVM.chatScrollNamespaceId), onChange: chatVM.onPreferenceChange)
         }
-        .background { TelegramBackground() }
+        .background(Color.appDark)
         .flipped()
         .coordinateSpace(name: chatVM.chatScrollNamespaceId)
         .scrollDismissesKeyboard(.interactively)

@@ -2,19 +2,11 @@
 
 import SwiftUI
 
-private struct ScrollEdgeEffectHiddenModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content.scrollEdgeEffectHidden(true, for: .all)
-        } else {
-            content
-        }
-    }
-}
-
 extension View {
+    /// No-op — scroll edge effect is handled by removing gradient overlays.
+    @ViewBuilder
     func compatibleScrollEdgeEffectHidden() -> some View {
-        modifier(ScrollEdgeEffectHiddenModifier())
+        self
     }
 
     @ViewBuilder

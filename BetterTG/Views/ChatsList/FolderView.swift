@@ -68,11 +68,11 @@ struct FolderView: View {
                             VStack(spacing: 0) {
                                 ChatsListItemView(folder: folder, customChat: customChat)
                                     .matchedGeometryEffect(id: customChat.chat.id, in: namespace)
-                                // Thin separator like Telegram
+                                // Thin Telegram-style separator
                                 Rectangle()
-                                    .fill(Color(red: 0.22, green: 0.22, blue: 0.24, opacity: 1))
-                                    .frame(height: 0.5)
-                                    .padding(.leading, 82)
+                                    .fill(Color(white: 0.25, opacity: 0.6))
+                                    .frame(height: 0.33)
+                                    .padding(.leading, 84)
                             }
                         }
                         .buttonStyle(.plain)

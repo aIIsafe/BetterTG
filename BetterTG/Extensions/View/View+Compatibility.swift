@@ -3,19 +3,33 @@
 import SwiftUI
 
 extension View {
-    /// No-op — scroll edge effect is handled by removing gradient overlays.
+    /// Hides the iOS 26 scroll edge blur/fade effect. No-op on older OS.
     @ViewBuilder
     func compatibleScrollEdgeEffectHidden() -> some View {
-        self
+        if #available(iOS 26.0, *) {
+            self.scrollEdgeEffectStyle(.hard, for: .all)
+        } else {
+            self
+        }
     }
 
+    /// Liquid Glass on iOS 26+, ultraThinMaterial on older.
     @ViewBuilder
     func compatibleGlassEffect() -> some View {
-        self.background(Color(red: 0.12, green: 0.12, blue: 0.14, opacity: 0.9))
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular)
+        } else {
+            self.background(.ultraThinMaterial)
+        }
     }
 
+    /// Interactive Liquid Glass (capsule shape) on iOS 26+.
     @ViewBuilder
     func compatibleGlassEffectInteractive() -> some View {
-        self.background(Color(red: 0.12, green: 0.12, blue: 0.14, opacity: 0.9), in: Capsule())
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: .capsule)
+        } else {
+            self.background(.ultraThinMaterial, in: Capsule())
+        }
     }
 }
